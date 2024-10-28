@@ -18,6 +18,8 @@ const themes = [
   { id: 'apple-music', name: 'Apple Music', colors: { dark: 'from-[#1A1A1A] via-[#2A2A2A] to-[#3A3A3A]', light: 'from-[#FA2C55]/30 via-white to-[#FA2C55]/20' } }
 ];
 
+const messageColors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A6', '#FFD700']; // Array of colors
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -27,38 +29,48 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState('default');
   const [showGoodbye, setShowGoodbye] = useState(false);
+  const [colorIndex, setColorIndex] = useState(0); // Track current message color
   const { speak } = useVoiceSynthesis();
 
+  // Welcome message after login
   useEffect(() => {
     if (isLoggedIn) {
       speak('Welcome to Tunify! Please select your preferred language and tell me about your day.', 'male');
     }
   }, [isLoggedIn]);
 
+  // Start recording automatically after language selection
   useEffect(() => {
     if (isLoggedIn && selectedLanguage) {
       startRecording();
     }
   }, [selectedLanguage]);
 
+  // Change the message color every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setColorIndex((prevIndex) => (prevIndex + 1) % messageColors.length);
+    }, 2000);
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, []);
+
   const startRecording = () => {
     setIsRecording(true);
     speak('Recording started. Please speak about your day.', 'male');
-    
+
     setTimeout(() => {
       setIsRecording(false);
       setIsProcessing(true);
-      
+
       setTimeout(() => {
         setIsProcessing(false);
         const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
         setDetectedEmotion(randomEmotion);
-        
-        // Speak the emotion and a random quote
+
         speak(`I detect that you're feeling ${randomEmotion}`, 'female');
         const quotes = emotionQuotes[randomEmotion as keyof typeof emotionQuotes];
         const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        
+
         setTimeout(() => {
           speak(randomQuote, 'male');
           setTimeout(() => {
@@ -77,7 +89,7 @@ function App() {
   };
 
   const handleSongSelect = () => {
-    setShowGoodbye(true);
+    setShowGoodbye(true); // Trigger the goodbye message
     speak('Thank you for using Tunify. Please visit again!', 'male');
   };
 
@@ -90,11 +102,15 @@ function App() {
     return <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
-  const currentTheme = themes.find(t => t.id === selectedTheme) || themes[0];
+  const currentTheme = themes.find((t) => t.id === selectedTheme) || themes[0];
   const themeColors = isDarkMode ? currentTheme.colors.dark : currentTheme.colors.light;
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 bg-gradient-to-br ${themeColors} ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+    <div
+      className={`min-h-screen transition-colors duration-300 bg-gradient-to-br ${themeColors} ${
+        isDarkMode ? 'text-white' : 'text-gray-900'
+      }`}
+    >
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-12 relative">
           <div className="absolute right-0 top-0 flex gap-2">
@@ -112,9 +128,9 @@ function App() {
               {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
           </div>
-          <h1 className={`text-5xl font-bold mb-4 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
+          <h1
+            className={`text-5xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+          >
             Tunify
           </h1>
           <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
@@ -130,47 +146,16 @@ function App() {
             theme={selectedTheme}
           />
 
-          {!detectedEmotion && (
-            <div className="flex flex-col items-center justify-center mt-12">
-              <button
-                onClick={startRecording}
-                disabled={isRecording || isProcessing}
-                className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  isRecording
-                    ? 'bg-red-600 animate-pulse'
-                    : `bg-purple-600 hover:bg-purple-700`
-                }`}
-              >
-                {isProcessing ? (
-                  <Loader2 className="w-12 h-12 animate-spin" />
-                ) : isRecording ? (
-                  <MicOff className="w-12 h-12" />
-                ) : (
-                  <Mic className="w-12 h-12" />
-                )}
-              </button>
-              <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-                {isProcessing
-                  ? 'Analyzing your voice...'
-                  : isRecording
-                  ? 'Recording... Speak about your day'
-                  : 'Click to start recording'}
-              </p>
+          {isRecording && (
+            <div className="text-center mt-8 text-2xl font-bold">
+              <span className="animate-pulse">🔴Analysing voice ...</span>
             </div>
           )}
 
           {detectedEmotion && (
             <>
-              <EmotionDisplay 
-                emotion={detectedEmotion} 
-                isDarkMode={isDarkMode}
-                theme={selectedTheme}
-              />
-              <EmotionQuote
-                emotion={detectedEmotion}
-                isDarkMode={isDarkMode}
-                theme={selectedTheme}
-              />
+              <EmotionDisplay emotion={detectedEmotion} isDarkMode={isDarkMode} theme={selectedTheme} />
+              <EmotionQuote emotion={detectedEmotion} isDarkMode={isDarkMode} theme={selectedTheme} />
               <SongList
                 emotion={detectedEmotion}
                 language={selectedLanguage}
@@ -178,25 +163,22 @@ function App() {
                 isDarkMode={isDarkMode}
                 onSongSelect={handleSongSelect}
               />
-              {showGoodbye && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center mt-8 text-2xl font-bold text-purple-400"
-                >
-                  Thank you for using Tunify. Please visit again!
-                </motion.div>
-              )}
-              <div className="text-center mt-8">
-                <button
-                  onClick={resetRecording}
-                  className="px-6 py-3 rounded-full transition-colors flex items-center gap-2 mx-auto bg-purple-600 hover:bg-purple-700"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Record Again
-                </button>
-              </div>
+              <button
+                onClick={resetRecording}
+                className="mt-4 mx-auto block px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Try Again
+              </button>
             </>
+          )}
+
+          {showGoodbye && (
+            <div
+              className="text-center mt-8 text-2xl font-bold animate-bounce"
+              style={{ color: messageColors[colorIndex] }}
+            >
+              Thank you, visit again - Harish M
+            </div>
           )}
         </div>
 
