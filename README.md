@@ -1,3 +1,3 @@
 # Tunify
 
-Am site that recomends songs based on users voice tone analysis
+A site that recomends songs based on users voice tone analysis
