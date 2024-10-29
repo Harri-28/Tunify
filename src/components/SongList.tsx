@@ -119,6 +119,21 @@ function SongList({ emotion, language, theme, isDarkMode, onSongSelect }: SongLi
     </div>
   );
 }
+return (
+    <div className={`space-y-6 rounded-lg p-6 ${styles.container}`}>
+      {/* Your JSX content here */}
+      <div className="flex items-center justify-between">
+        <h3 className={`text-2xl font-bold ${styles.text}`}>
+          Recommended Songs
+        </h3>
+        <span className={styles.subtext}>
+          {songList.length} songs
+        </span>
+      </div>
+      {/* Continue with the rest of your code... */}
+    </div>
+  );
+}
 
 export default SongList;
 
