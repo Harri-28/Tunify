@@ -9,6 +9,7 @@ import ThemeSelector from './components/ThemeSelector';
 import Testimonials from './components/Testimonials';
 import useVoiceSynthesis from './hooks/useVoiceSynthesis';
 import { emotionQuotes } from './data/quotes';
+import './styles.css';
 
 const emotions = ['happy', 'sad', 'angry', 'fearful', 'neutral'];
 const themes = [
