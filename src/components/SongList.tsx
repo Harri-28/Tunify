@@ -122,8 +122,4 @@ function SongList({ emotion, language, theme, isDarkMode, onSongSelect }: SongLi
 
 export default SongList;
 
-    </div>
-  );
-}
 
-export default SongList;
