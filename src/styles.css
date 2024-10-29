@@ -1,0 +1,28 @@
+/* Button Animation and Hover */
+button {
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: scale(1.1);
+  background-color: #1db954;
+  color: white;
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px #1db954; }
+  50% { box-shadow: 0 0 20px #1db954; }
+}
+
+button:hover {
+  animation: glow 1s infinite;
+}
+
+/* Thumbnail Styling */
+.thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
